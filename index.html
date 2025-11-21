@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Yesman's Portfolio</title>
+
+  <!-- EmailJS (for client-side email sending) -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #0f0f0f;
+      --bg-2: #111;
+      --card: #111;
+      --muted: #bfbfbf;
+      --accent: #00ff9d;
+      --text: #fff;
+      --glass: rgba(255,255,255,0.06);
+    }
+    [data-theme="light"]{
+      --bg: #f5f5f7;
+      --bg-2: #fff;
+      --card: #fff;
+      --muted: #444;
+      --accent: #006b32;
+      --text: #0b0b0b;
+      --glass: rgba(11,11,11,0.04);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #151515 80%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      transition: background .35s ease, color .35s ease;
+    }
+
+    /* NAVBAR */
+    nav{
+      position:fixed;
+      inset:0 0 auto 0;
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:12px 28px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35), transparent);
+      z-index:999;
+      backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .nav-left{display:flex;align-items:center;gap:14px}
+    .brand{
+      display:flex;gap:12px;align-items:center;font-weight:700;font-size:18px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent), #00d08a);display:flex;align-items:center;justify-content:center;color:#000;font-weight:800;
+      box-shadow:0 6px 18px rgba(0,0,0,0.5);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .nav-links{display:flex;gap:18px;align-items:center}
+    .nav-links a{
+      color:var(--text);text-decoration:none;font-weight:600;padding:8px 10px;border-radius:8px;opacity:0.95;
+    }
+    .nav-links a.active{background:var(--glass);color:var(--accent);box-shadow:inset 0 -3px 0 rgba(0,0,0,0.15)}
+    .nav-actions{display:flex;gap:10px;align-items:center}
+
+    .btn{
+      background:var(--accent);color:#000;padding:8px 12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .ghost{background:transparent;border:1px solid var(--glass);padding:8px 10px;border-radius:8px;color:var(--text);cursor:pointer}
+
+    /* header hero */
+    header.hero{
+      padding:110px 20px 60px;
+      text-align:center;
+      background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=60');
+      background-size:cover;
+      background-position:center;
+      position:relative;
+      isolation:isolate;
+      overflow:hidden;
+    }
+    header.hero::after{
+      content:"";
+      position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.45),rgba(0,0,0,0.55));z-index:0;
+    }
+    header .hero-inner{position:relative;z-index:1;max-width:1000px;margin:auto}
+    h1{font-size: clamp(28px,4vw,52px);margin:0 0 6px}
+    p.lead{opacity:0.9;margin:0 0 14px;color:var(--text)}
+
+    /* layout sections */
+    main{max-width:1100px;margin:30px auto;padding:0 20px 80px}
+    section{margin:28px 0}
+    .card{
+      background:var(--card);
+      padding:28px;border-radius:14px;border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 10px 30px rgba(0,0,0,0.45);
+      transition:transform .28s ease, box-shadow .28s ease;
+      transform-style:preserve-3d;
+    }
+    .card:hover{transform: translateY(-8px) rotateX(1deg); box-shadow:0 20px 56px rgba(0,0,0,0.6)}
+
+    h2.section-title{color:var(--accent);font-size:24px;margin:0 0 12px;text-align:center}
+
+    /* skills */
+    .skills-list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+    .skill{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);font-weight:600}
+
+    /* projects grid */
+    .projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    .project-card{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);transition:transform .2s}
+    .project-card:hover{transform:translateY(-8px) rotateX(1deg) scale(1.02)}
+
+    .project-meta{font-size:13px;color:var(--muted);margin-top:8px}
+
+    /* contact */
+    .contact-info{display:flex;flex-direction:column;gap:6px;align-items:center}
+    .contact-info a{color:var(--accent);text-decoration:none;font-weight:700}
+
+    /* modal */
+    .modal{display:none;position:fixed;inset:0;justify-content:center;align-items:center;background:rgba(0,0,0,0.6);z-index:2000}
+    .modal.show{display:flex}
+    .modal-panel{width:100%;max-width:420px;background:var(--card);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+    .form-row{margin-top:10px}
+    input[type="text"],input[type="email"],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)}
+    textarea{min-height:120px;resize:vertical}
+    .send-btn{width:100%;margin-top:12px;padding:10px;border-radius:10px;border:none;background:var(--accent);color:#000;font-weight:700;cursor:pointer}
+
+    /* toast */
+    .toast{position:fixed;right:18px;bottom:18px;padding:12px 16px;border-radius:10px;background:#111;border:1px solid rgba(255,255,255,0.05);box-shadow:0 8px 26px rgba(0,0,0,0.6);z-index:3000;opacity:0;transform:translateY(8px);transition:all .28s}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    /* small screens */
+    @media (max-width:700px){
+      nav{padding:10px 14px}
+      .nav-links{display:none}
+      .brand{gap:8px}
+    }
+
+    /* reveal animation */
+    .reveal{opacity:0;transform:translateY(18px);transition:all .6s cubic-bezier(.2,.9,.2,1)}
+    .reveal.in{opacity:1;transform:translateY(0)}
+
+    /* =========================
+       CUSTOM HOVER EFFECTS
+    =========================*/
+
+    /* NAVBAR HOVER */
+    .nav-links a:hover {
+      color: var(--accent);
+      opacity: 1;
+      transform: translateY(-2px);
+      transition: 0.25s ease;
+    }
+
+    /* BUTTON HOVER */
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 22px rgba(0, 255, 157, 0.25);
+      transition: 0.25s ease;
+    }
+
+    .ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-3px);
+      transition: 0.25s ease;
+    }
+
+    /* LOGO HOVER */
+    .logo:hover {
+      transform: rotate(6deg) scale(1.07);
+      transition: 0.25s ease;
+      box-shadow: 0 10px 24px rgba(0, 255, 157, 0.35);
+    }
+
+    /* CARD HOVER */
+    .card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    /* PROJECT CARD HOVER */
+    .project-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      border-color: rgba(0, 255, 157, 0.35);
+      box-shadow: 0 20px 50px rgba(0, 255, 157, 0.1);
+      transition: 0.25s ease;
+    }
+
+    /* SKILL HOVER */
+    .skill:hover {
+      background: var(--accent);
+      color: #000;
+      transform: translateY(-4px) scale(1.07);
+      box-shadow: 0 10px 22px rgba(0,255,157,0.25);
+      transition: 0.25s ease;
+    }
+
+    /* LINK HOVER */
+    a:hover {
+      opacity: 1;
+      color: var(--accent);
+      transition: 0.25s ease;
+    }
+
+    /* =========================
+       THEME SWITCH STYLES
+    ========================= */
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px;
+      border-radius: 999px;
+    }
+    /* switch container */
+    .switch {
+      position: relative;
+      width: 56px;
+      height: 30px;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.12);
+      cursor: pointer;
+      transition: background .25s ease, box-shadow .25s ease, transform .25s ease;
+      display: inline-block;
+    }
+    /* the knob */
+    .switch .knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.35);
+      transition: transform .28s cubic-bezier(.2,.9,.2,1), background .25s;
+      display:flex; align-items:center; justify-content:center;
+      font-size:14px;
+    }
+    /* when active = light theme */
+    .switch.active {
+      background: linear-gradient(90deg, rgba(0,255,157,0.18), rgba(0,255,157,0.12));
+      box-shadow: 0 8px 24px rgba(0,255,157,0.08);
+    }
+    .switch.active .knob {
+      transform: translateX(26px);
+      background: #fff;
+    }
+    /* icons */
+    .theme-icon { font-size:14px; opacity:0.95; user-select:none; }
+    .theme-label { font-size:12px; color:var(--muted); display:none; } /* hidden to keep UI clean */
+
+  </style>
+</head>
+<body data-theme="dark">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-left">
+      <div class="brand" aria-hidden="true">
+        <div class="logo">Y</div>
+        <div style="line-height:1">
+          <div style="font-size:14px">Yesman</div>
+          <div style="font-size:11px;color:var(--muted)">Frontend Dev</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-links" role="navigation" aria-label="Main">
+      <a href="#about" data-target="about">About</a>
+      <a href="#skills" data-target="skills">Skills</a>
+      <a href="#projects" data-target="projects">Projects</a>
+      <a href="#contact" data-target="contact">Contact</a>
+    </div>
+
+    <div class="nav-actions">
+      <!-- THEME SWITCH (replaces old theme button) -->
+      <div class="theme-switch" title="Toggle theme">
+        <div id="switch" class="switch" role="switch" aria-checked="false" tabindex="0">
+          <div class="knob" id="knob">🌙</div>
+        </div>
+      </div>
+
+      <a class="btn" id="hireNavBtn">Hire Me</a>
+    </div>
+  </nav>
+
+  <div style="height:64px"></div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-inner reveal" style="max-width:980px;margin:auto">
+      <h1>Hi, I'm <span style="color:var(--accent)">Yesman Natanaeel Agung Kristanto</span>.</h1>
+      <p class="lead">Mahasiswa Sistem Informasi & Frontend enthusiast — saya buat antarmuka yang rapi, interaktif, dan cepat. Siap magang / kerja.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px">
+        <a class="btn" href="#projects">See Projects</a>
+        <button class="ghost" id="scrollContact">Contact</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ABOUT -->
+    <section id="about" class="reveal">
+      <div class="card">
+        <h2 class="section-title">About Me</h2>
+        <p style="text-align:center;line-height:1.6;max-width:820px;margin:auto">
+          Nama gue Yesman. Seorang mahasiswa Sistem Informasi yang suka ngulik UI/UX dan frontend. Saya fokus ke pengalaman pengguna (micro-interactions), responsive design, dan animasi ringan yang meningkatkan kualitas antarmuka. Prinsip saya: make it useful, then make it pretty.
+        </p>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="reveal">
+      <div class="card">
+        <h2 class="section-title">Skills</h2>
+        <div class="skills-list" aria-hidden="false">
+          <div class="skill">HTML</div>
+          <div class="skill">CSS</div>
+          <div class="skill">JavaScript</div>
+          <div class="skill">Bootstrap</div>
+          <div class="skill">PHP</div>
+          <div class="skill">Python</div>
+          <div class="skill">Responsive Design</div>
+          <div class="skill">UI/UX Basics</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="reveal">
+      <div class="card">
+        <h2 class="section-title">Projects</h2>
+        <div class="projects-grid" role="list">
+          <article class="project-card" role="listitem">
+            <h3>Birthday Surprise Website</h3>
+            <p class="project-meta">Website interaktif untuk Erika - kue 3 layer, lilin interaktif, sakura jatuh, balon dan music.</p>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="project-btn" data-demo="demo-birthday">View Demo</button>
+              <a class="ghost" href="#" download>Download</a>
+            </div>
+          </article>
+
+          <article class="project-card" role="listitem">
+            <h3>Hybrid Campus App MVP</h3>
+            <p class="project-meta">Prototype app kampus hybrid, visualisasi data & flows untuk mahasiswa dan dosen.</p>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="project-btn" data-demo="demo-hybrid">View Demo</button>
+              <a class="ghost" href="#" download>Download</a>
+            </div>
+          </article>
+
+          <article class="project-card" role="listitem">
+            <h3>Car Decision Tree System</h3>
+            <p class="project-meta">Sistem pakar pemilihan mobil berdasarkan atribut — 18+ possible conclusions.</p>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="project-btn" data-demo="demo-car">View Demo</button>
+              <a class="ghost" href="#" download>Download</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="reveal">
+      <div class="card contact-card" style="text-align:center">
+        <h2 class="section-title">Contact Me</h2>
+        <div class="contact-info">
+          <div>Email: <a href="mailto:yesman@example.com">yesman@example.com</a></div>
+          <div>LinkedIn: <a href="https://linkedin.com/in/yesman" target="_blank" rel="noreferrer">linkedin.com/in/yesman</a></div>
+          <div style="margin-top:10px">
+            <button class="btn" id="hireBtn">Hire Me</button>
+            <button class="ghost" id="downloadCV">Download CV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="text-align:center;padding:36px 10px 80px;color:var(--muted);">
+    © 2025 Yesman — Portfolio Website
+  </footer>
+
+  <!-- HIRE MODAL -->
+  <div class="modal" id="hireModal" aria-hidden="true" role="dialog" aria-labelledby="hireTitle">
+    <div class="modal-panel" role="document">
+      <h3 id="hireTitle">Send Hiring Request</h3>
+      <p style="opacity:.85;margin-top:6px">Isi form di bawah — email akan dikirim ke <strong>yesagung30@gmail.com</strong></p>
+
+      <div class="form-row">
+        <label class="sr-only" for="clientName">Name</label>
+        <input id="clientName" type="text" placeholder="Your name" aria-label="Your name" />
+      </div>
+
+      <div class="form-row">
+        <label class="sr-only" for="clientEmail">Email</label>
+        <input id="clientEmail" type="email" placeholder="Your email" aria-label="Your email" />
+      </div>
+
+      <div class="form-row">
+        <label class="sr-only" for="clientMsg">Message</label>
+        <textarea id="clientMsg" placeholder="Describe the job/project" aria-label="Describe the job"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="send-btn" id="sendHire">Send</button>
+        <button class="ghost" id="cancelHire">Cancel</button>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px">We will forward request to <strong>yesagung30@gmail.com</strong>.</div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ========= THEME SWITCH (new) =========
+    const switchEl = document.getElementById('switch');
+    const knob = document.getElementById('knob');
+    const body = document.body;
+
+    // initialize theme from localStorage (fall back to dark)
+    const stored = localStorage.getItem('theme') || 'dark';
+    body.setAttribute('data-theme', stored);
+    if (stored === 'light') {
+      switchEl.classList.add('active');
+      switchEl.setAttribute('aria-checked', 'true');
+      knob.textContent = '☀️';
+    } else {
+      switchEl.classList.remove('active');
+      switchEl.setAttribute('aria-checked', 'false');
+      knob.textContent = '🌙';
+    }
+
+    function setTheme(theme) {
+      body.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      if (theme === 'light') {
+        switchEl.classList.add('active');
+        switchEl.setAttribute('aria-checked', 'true');
+        knob.textContent = '☀️';
+      } else {
+        switchEl.classList.remove('active');
+        switchEl.setAttribute('aria-checked', 'false');
+        knob.textContent = '🌙';
+      }
+    }
+
+    // toggle on click / keyboard
+    switchEl.addEventListener('click', () => {
+      const current = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      setTheme(current);
+    });
+    switchEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const current = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        setTheme(current);
+      }
+    });
+
+    // ========= SMOOTH SCROLL OFFSET HANDLER =========
+    function scrollToId(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const navHeight = document.querySelector('nav').offsetHeight || 64;
+      const y = el.getBoundingClientRect().top + window.scrollY - navHeight - 12;
+      window.scrollTo({top: y, behavior: 'smooth'});
+    }
+    document.querySelectorAll('.nav-links a').forEach(a=>{
+      a.addEventListener('click', e=>{ e.preventDefault(); const t=a.getAttribute('data-target'); scrollToId(t); });
+    });
+    document.getElementById('scrollContact').addEventListener('click', ()=>scrollToId('contact'));
+
+    // ========= NAVBAR ACTIVE HIGHLIGHT =========
+    const sections = document.querySelectorAll('main section[id], header.hero');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const observerOptions = { root:null, rootMargin: '0px', threshold: 0.45 };
+
+    const obs = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        const id = entry.target.id;
+        if(entry.isIntersecting){
+          navLinks.forEach(l=> l.classList.toggle('active', l.dataset.target === id));
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(s=> obs.observe(s));
+
+    // ========= REVEAL ON SCROLL =========
+    const reveals = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting) entry.target.classList.add('in');
+      });
+    }, {threshold:0.15});
+    reveals.forEach(r=> revealObserver.observe(r));
+
+    // ========= PROJECT BUTTONS (demo placeholders) =========
+    document.querySelectorAll('.project-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> {
+        showToast('Demo belum diupload — kamu bisa ganti link demo pada kode.', 2500);
+      });
+    });
+
+    // ========= CV DOWNLOAD =========
+    document.getElementById('downloadCV').addEventListener('click', ()=> {
+      showToast('Download CV: taruh file resume.pdf di public root atau ganti link.', 2500);
+      // Example: window.location.href = '/resume.pdf';
+    });
+
+    // ========= HIRE MODAL LOGIC =========
+    const hireModal = document.getElementById('hireModal');
+    const hireBtn = document.getElementById('hireBtn');
+    const hireNavBtn = document.getElementById('hireNavBtn');
+    const cancelHire = document.getElementById('cancelHire');
+    const sendHire = document.getElementById('sendHire');
+    const toast = document.getElementById('toast');
+
+    function openModal(){ hireModal.classList.add('show'); hireModal.setAttribute('aria-hidden','false'); document.getElementById('clientName').focus(); }
+    function closeModal(){ hireModal.classList.remove('show'); hireModal.setAttribute('aria-hidden','true'); }
+
+    hireBtn.addEventListener('click', openModal);
+    hireNavBtn.addEventListener('click', openModal);
+    cancelHire.addEventListener('click', closeModal);
+    hireModal.addEventListener('click', (e)=> { if(e.target === hireModal) closeModal(); });
+
+    // toast helper
+    function showToast(msg, ms=3000){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), ms);
+    }
+
+    // simple validation
+    function validateHire(data){
+      if(!data.name || data.name.trim().length < 2) return 'Isi nama lengkap.';
+      if(!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) return 'Email tidak valid.';
+      if(!data.message || data.message.trim().length < 8) return 'Deskripsi pekerjaan minimal 8 karakter.';
+      return null;
+    }
+
+    // ========== EMAILJS SEND ==========
+    // NOTE: replace these with your real EmailJS public key, service ID and template ID
+    emailjs.init("YOUR_PUBLIC_KEY"); // <-- GANTI
+
+    sendHire.addEventListener("click", async () => {
+      const data = {
+        name: document.getElementById("clientName").value.trim(),
+        email: document.getElementById("clientEmail").value.trim(),
+        message: document.getElementById("clientMsg").value.trim(),
+      };
+
+      // validate
+      const error = validateHire(data);
+      if (error) return showToast(error, 2800);
+
+      // kirim email
+      try {
+        await emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+          client_name: data.name,
+          client_email: data.email,
+          client_message: data.message,
+          send_to: "yesagung30@gmail.com" // penerima
+        });
+
+        showToast("Hiring request terkirim! Cek email lo.", 3000);
+        closeModal();
+
+        // reset form
+        document.getElementById("clientName").value = "";
+        document.getElementById("clientEmail").value = "";
+        document.getElementById("clientMsg").value = "";
+
+      } catch (err) {
+        console.error(err);
+        showToast("Gagal mengirim. Coba lagi.", 3000);
+      }
+    });
+
+  </script>
+</body>
+</html>
